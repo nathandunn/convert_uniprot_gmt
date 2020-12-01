@@ -19,7 +19,6 @@ class ConvertUniprotGmt extends Command {
   async convertFile2(inputFile: string, outputFile: string) {
     const fileText = fs.readFileSync(inputFile, 'utf8')
     const ids = this.collectIds(fileText)
-    console.log('ids ',ids.length)
     const CHUNK_SIZE = 300
     const promises = []
     for (let i = 0; i < ids.length; i += CHUNK_SIZE) {

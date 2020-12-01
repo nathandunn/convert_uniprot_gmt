@@ -19,27 +19,23 @@ class ConvertUniprotGmt extends Command {
   async convertFile2(inputFile: string, outputFile: string) {
     const fileText = fs.readFileSync(inputFile, 'utf8')
     const ids = this.collectIds(fileText)
-    await this.getIds(ids) // do a single large fetch
-    const outputText = this.convertEntries2(fileText.split('\n'))
-    // let outputText = ''
-    // for (const line of fileText.split('\n')) {
-    //   const entries = line.split('\t')
-    //   outputText += entries[0]
-    //   outputText += await this.convertEntries(entries.slice(1))
-    // }
+    await this.getIds(ids.join(' ')) // do a single large fetch
+    const outputText = this.convertEntries2(fileText.split('\n').filter(f => f.trim().length > 0))
     fs.writeFileSync(outputFile, outputText)
   }
 
-  // TODO: iterate therough the text and collect the ids
-  collectIds(fileText: string): Set<string> {
-    const outputs = new Array()
+  // TODO: iterate through the text and collect the ids
+  collectIds(fileText: string): Array<string> {
+    let outputs = new Array<string>()
     const lines = fileText.split('\n')
     for (const line of lines) {
-      const entries = line.split('\t')
-      outputs.concat([...entries.slice(1).map(e => e.replace('UniProtKB:', ''))])
+      const entries = line.split('\t').slice(1)
+      const formattedLine = entries.map(e => e.replace('UniProtKB:', ''))
+      if (formattedLine.length > 0) {
+        outputs = outputs.concat(...formattedLine)
+      }
     }
-
-    return new Set(outputs)
+    return [...new Set(outputs)]
   }
 
   async convertFile(inputFile: string, outputFile: string) {
@@ -55,9 +51,14 @@ class ConvertUniprotGmt extends Command {
 
   convertEntries2(entries: string[]): string {
     const formattedEntries = entries.map(e => {
-      return e.replace('UniProtKB:', '')
-    }).join(' ')
-    return formattedEntries.split(' ').map(f => idMap.get(f)).join('\t')
+      return e.replace(/UniProtKB:/g, '')
+    })
+    const exportData = formattedEntries.map(f => {
+      const lineEntries = f.split('\t')
+      const outputLine = lineEntries[0] + '\t'+ lineEntries.slice(1).map( l => idMap.get(l)).join('\t')
+      return outputLine
+    }).join('\n')
+    return exportData
   }
 
   async convertEntries(entries: string[]): Promise<string> {

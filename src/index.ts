@@ -68,7 +68,7 @@ class ConvertUniprotGmt extends Command {
     const CHUNK_SIZE = 500
     const promises = []
     for (let i = 0; i < formattedEntries.length; i += CHUNK_SIZE) {
-      promises.push(this.getIds(formattedEntries.slice(i,i+CHUNK_SIZE)))
+      promises.push(this.getIds(formattedEntries.slice(i, i + CHUNK_SIZE)))
     }
     await Promise.all(promises)
     return formattedEntries.split(' ').map(f => idMap.get(f)).join('\t')

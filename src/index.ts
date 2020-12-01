@@ -55,7 +55,7 @@ class ConvertUniprotGmt extends Command {
     })
     const exportData = formattedEntries.map(f => {
       const lineEntries = f.split('\t')
-      const outputLine = lineEntries[0] + '\t'+ lineEntries.slice(1).map( l => idMap.get(l)).join('\t')
+      const outputLine = lineEntries[0] + '\t' + lineEntries.slice(1).map(l => idMap.get(l)).join('\t')
       return outputLine
     }).join('\n')
     return exportData
@@ -65,7 +65,12 @@ class ConvertUniprotGmt extends Command {
     const formattedEntries = entries.map(e => {
       return e.replace('UniProtKB:', '')
     }).join(' ')
-    await this.getIds(formattedEntries)
+    const CHUNK_SIZE = 500
+    const promises = []
+    for (let i = 0; i < formattedEntries.length; i += CHUNK_SIZE) {
+      promises.push(this.getIds(formattedEntries.slice(i,i+CHUNK_SIZE)))
+    }
+    await Promise.all(promises)
     return formattedEntries.split(' ').map(f => idMap.get(f)).join('\t')
   }
 

@@ -16,6 +16,31 @@ class ConvertUniprotGmt extends Command {
 
   static args = [{name: 'input', description: 'input gmt file with uniprot ids'}, {name: 'output', description: 'output gmt file with gene symbols'}]
 
+  async convertFile2(inputFile: string, outputFile: string) {
+    const fileText = fs.readFileSync(inputFile, 'utf8')
+    const ids = this.collectIds(fileText)
+    await this.getIds(ids) // do a single large fetch
+    const outputText = this.convertEntries2(fileText.split('\n'))
+    // let outputText = ''
+    // for (const line of fileText.split('\n')) {
+    //   const entries = line.split('\t')
+    //   outputText += entries[0]
+    //   outputText += await this.convertEntries(entries.slice(1))
+    // }
+    fs.writeFileSync(outputFile, outputText)
+  }
+
+  // TODO: iterate therough the text and collect the ids
+  collectIds(fileText: string): Array<string> {
+    const outputs = []
+    const lines = fileText.split('\n')
+    for (const line of lines) {
+
+    }
+
+    return outputs
+  }
+
   async convertFile(inputFile: string, outputFile: string) {
     const fileText = fs.readFileSync(inputFile, 'utf8')
     let outputText = ''
@@ -25,6 +50,13 @@ class ConvertUniprotGmt extends Command {
       outputText += await this.convertEntries(entries.slice(1))
     }
     fs.writeFileSync(outputFile, outputText)
+  }
+
+  convertEntries2(entries: string[]): string {
+    const formattedEntries = entries.map(e => {
+      return e.replace('UniProtKB:', '')
+    }).join(' ')
+    return formattedEntries.split(' ').map(f => idMap.get(f)).join('\t')
   }
 
   async convertEntries(entries: string[]): Promise<string> {
@@ -53,7 +85,8 @@ class ConvertUniprotGmt extends Command {
     if (args.input && args.output) {
       if (fs.existsSync(args.input)) {
         if (fs.existsSync(args.output)) fs.unlinkSync(args.output) // delete output if exists
-        this.convertFile(args.input, args.output)
+        // this.convertFile(args.input, args.output)
+        this.convertFile2(args.input, args.output)
       }
     }
   }

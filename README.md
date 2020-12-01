@@ -19,7 +19,7 @@ $ npm install -g convert_uniprot_gmt
 $ convert_uniprot_gmt COMMAND
 running command...
 $ convert_uniprot_gmt (-v|--version|version)
-convert_uniprot_gmt/0.0.1 darwin-x64 node-v12.16.1
+convert_uniprot_gmt/0.0.2 darwin-x64 node-v12.16.1
 $ convert_uniprot_gmt --help [COMMAND]
 USAGE
   $ convert_uniprot_gmt COMMAND

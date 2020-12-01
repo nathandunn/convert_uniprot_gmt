@@ -19,7 +19,13 @@ class ConvertUniprotGmt extends Command {
   async convertFile2(inputFile: string, outputFile: string) {
     const fileText = fs.readFileSync(inputFile, 'utf8')
     const ids = this.collectIds(fileText)
-    await this.getIds(ids.join(' ')) // do a single large fetch
+    console.log('ids ',ids.length)
+    const CHUNK_SIZE = 300
+    const promises = []
+    for (let i = 0; i < ids.length; i += CHUNK_SIZE) {
+      promises.push(this.getIds(ids.slice(i, i + CHUNK_SIZE).join(' ')))
+    }
+    await Promise.all(promises)
     const outputText = this.convertEntries2(fileText.split('\n').filter(f => f.trim().length > 0))
     fs.writeFileSync(outputFile, outputText)
   }
@@ -76,8 +82,12 @@ class ConvertUniprotGmt extends Command {
 
   async getIds(ids: string): Promise<any> {
     const url = `${DEFAULT_URL}?query=${ids}&from=ACC+ID&to=GENE+NAME&format=tab`
-    const {data} = await axios.get(url)
-    this.addTsvToMap(data)
+    try {
+      const {data} = await axios.get(url)
+      this.addTsvToMap(data)
+    } catch (e) {
+      console.error(e)
+    }
   }
 
   addTsvToMap(data: string) {

@@ -1,7 +1,7 @@
 {
   "name": "convert_uniprot_gmt",
   "description": "Converts GMT files with uniprot to gmt",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "author": "Nathan Dunn @nathandunn",
   "bin": {
     "convert_uniprot_gmt": "./bin/run"

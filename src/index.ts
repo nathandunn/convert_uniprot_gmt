@@ -31,14 +31,15 @@ class ConvertUniprotGmt extends Command {
   }
 
   // TODO: iterate therough the text and collect the ids
-  collectIds(fileText: string): Array<string> {
-    const outputs = []
+  collectIds(fileText: string): Set<string> {
+    const outputs = new Array()
     const lines = fileText.split('\n')
     for (const line of lines) {
-
+      const entries = line.split('\t')
+      outputs.concat([...entries.slice(1).map(e => e.replace('UniProtKB:', ''))])
     }
 
-    return outputs
+    return new Set(outputs)
   }
 
   async convertFile(inputFile: string, outputFile: string) {

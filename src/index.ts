@@ -18,6 +18,7 @@ class ConvertUniprotGmt extends Command {
 
   async convertFile2(inputFile: string, outputFile: string) {
     const fileText = fs.readFileSync(inputFile, 'utf8')
+    console.log('collecting all ids')
     const ids = this.collectIds(fileText)
     const CHUNK_SIZE = 300
     const promises = []
@@ -25,6 +26,7 @@ class ConvertUniprotGmt extends Command {
       promises.push(this.getIds(ids.slice(i, i + CHUNK_SIZE).join(' ')))
     }
     await Promise.all(promises)
+    console.log('output ids', idMap.size)
     const outputText = this.convertEntries2(fileText.split('\n').filter(f => f.trim().length > 0))
     fs.writeFileSync(outputFile, outputText)
   }
@@ -98,11 +100,13 @@ class ConvertUniprotGmt extends Command {
 
   async run() {
     const {args} = this.parse(ConvertUniprotGmt)
-    if (args.input && args.output) {
+    if (args.input) {
       if (fs.existsSync(args.input)) {
-        if (fs.existsSync(args.output)) fs.unlinkSync(args.output) // delete output if exists
+        const output = args.output ? args.output : `${args.input}_converted.gmt`
+        console.log('converted ids from ', args.input, output)
+        if (fs.existsSync(output)) fs.unlinkSync(output) // delete output if exists
         // this.convertFile(args.input, args.output)
-        this.convertFile2(args.input, args.output)
+        this.convertFile2(args.input, output)
       }
     }
   }
